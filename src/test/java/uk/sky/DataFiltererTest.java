@@ -12,6 +12,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 import static uk.sky.DataFilterer.filterByCountry;
 import static uk.sky.DataFilterer.filterByCountryWithResponseTimeAboveLimit;
+import static uk.sky.DataFilterer.filterByResponseTimeAboveAverage;
 
 public class DataFiltererTest {
 
@@ -39,9 +40,7 @@ public class DataFiltererTest {
 
     @Test
     public void should_not_return_filtered_log_extract_for_a_invalid_country_code_whenSingleLine() throws FileNotFoundException {
-        Collection<?> actualLogExtracts = filterByCountry(openFile(SINGLE_LINE_FILE), UNKNOWN);
-
-        assertThat(actualLogExtracts.size(), is(0));
+        assertTrue(filterByCountry(openFile(SINGLE_LINE_FILE), UNKNOWN).isEmpty());
     }
 
     @Test
@@ -56,9 +55,7 @@ public class DataFiltererTest {
 
     @Test
     public void should_not_return_filtered_log_extract_for_a_invalid_country_code_whenMultipleLine() throws FileNotFoundException {
-        Collection<?> actualLogExtracts = filterByCountry(openFile(MULTI_LINE_FILE), UNKNOWN);
-
-        assertThat(actualLogExtracts.size(), is(0));
+        assertTrue(filterByCountry(openFile(MULTI_LINE_FILE), UNKNOWN).isEmpty());
     }
 
     @Test
@@ -86,6 +83,25 @@ public class DataFiltererTest {
         assertEquals(actualLogExtracts, expectedLogExtracts);
     }
 
+    @Test
+    public void should_return_filtered_log_extract_greater_than_average_response_time_limit_whenEmpty() throws FileNotFoundException {
+        assertTrue(filterByResponseTimeAboveAverage(openFile(EMPTY_FILE)).isEmpty());
+    }
+
+    @Test
+    public void should_return_filtered_log_extract_greater_than_average_response_time_limit_whenSingleLine()throws FileNotFoundException {
+        assertTrue(filterByResponseTimeAboveAverage(openFile(SINGLE_LINE_FILE)).isEmpty());
+    }
+
+    @Test
+    public void should_return_filtered_log_extract_greater_than_average_response_time_limit_whenMultipleLine()throws FileNotFoundException {
+        Collection<?> expectedLogExtracts = Arrays.asList(new LogExtract(1433190845L,US,539L), new LogExtract(1433666287L,US,789L), new LogExtract(1432484176L,US,850L));
+
+        Collection<?> actualLogExtracts = filterByResponseTimeAboveAverage(openFile(MULTI_LINE_FILE));
+
+        assertThat(actualLogExtracts.size(), is(3));
+        assertEquals(actualLogExtracts, expectedLogExtracts);
+    }
 
     private FileReader openFile(String filename) throws FileNotFoundException {
         return new FileReader(new File(filename));

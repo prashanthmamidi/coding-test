@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
+import static java.util.Collections.emptyList;
 
 public class DataFilterer {
     public static Collection<?> filterByCountry(Reader source, String country) {
@@ -26,6 +28,9 @@ public class DataFilterer {
 
     public static Collection<?> filterByResponseTimeAboveAverage(Reader source) {
         List<LogExtract> logExtracts = getLogExtractsFrom(source);
+        if (logExtracts.isEmpty()) {
+            return emptyList();
+        }
         double average = logExtracts.stream()
             .mapToLong(rt -> rt.getResponseTime())
             .average().getAsDouble();
